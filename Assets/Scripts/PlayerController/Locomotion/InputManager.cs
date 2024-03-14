@@ -13,9 +13,11 @@ public class InputManager : MonoBehaviour
     public float cameraInputX;
     public float cameraInputY;
 
-    private float moveAmmount;
+    public float moveAmmount;
     public float verticalInput;
     public float horizontalInput;
+
+    public bool sprintInput;
 
     public void Awake() {
         animatorManager = GetComponent<AnimatorManager>();
