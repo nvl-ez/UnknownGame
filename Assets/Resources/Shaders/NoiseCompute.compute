@@ -1,0 +1,94 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel GenerateNoise
+
+#include "MetricsCompute.compute"
+#include "Includes\Noise.compute"
+
+RWStructuredBuffer<float> _Weights;
+
+int _Chunksize;
+float3 _Offset;
+
+float _caveAmplitude;
+float _caveFrequency;
+int _caveOctaves;
+
+float _groundAmplitude;
+float _groundFrequency;
+int _groundOctaves;
+
+float _islandsAmplitude;
+float _islandsFrequency;
+int _islandsOctaves;
+
+float _Radius;
+float _insideRadius;
+float _crustWidth;
+float _ground;
+float _air;
+int _Scale;
+int _Seed;
+
+//Calculates the noise over a position
+float noise(float3 worldPos, float mapValue, float frequency, float amplitude, float octaves)
+{
+    for (int i = 0; i < octaves; i++)
+    {
+        mapValue += snoise(worldPos * frequency) * amplitude;
+        amplitude *= 0.5f;
+        frequency *= 2.0f;
+    }
+    return mapValue;
+}
+
+[numthreads(numThreads, numThreads, numThreads)]
+void GenerateNoise(uint3 id : SV_DispatchThreadID)
+{
+    float3 worldPos = float3(id) / (_ChunkSize - 1) * _Scale + _Offset;
+    float dstFromWorldCenter = length(worldPos);
+    float mapValue = 1;
+    float _sensitivity = 1;
+    
+    
+    if (dstFromWorldCenter < _insideRadius) //if we're in the caves
+    {
+        mapValue = -_sensitivity;
+        
+        mapValue = noise(worldPos, mapValue, _caveFrequency, _caveAmplitude, _caveOctaves);
+    }
+    else if (dstFromWorldCenter < (_insideRadius + _crustWidth)) //Near the inside wall
+    {
+        mapValue =  dstFromWorldCenter - _sensitivity - _insideRadius;
+        
+        mapValue = noise(worldPos, mapValue, _groundFrequency, _groundAmplitude, _groundOctaves);
+    }
+    else if (dstFromWorldCenter < _insideRadius + 2 * _crustWidth+_ground) //Near the outside wall
+    {
+        mapValue =  -dstFromWorldCenter + _insideRadius + 2 * _crustWidth - _sensitivity;
+
+        mapValue = noise(worldPos, mapValue, _groundFrequency, _groundAmplitude, _groundOctaves);
+    }
+    else if (dstFromWorldCenter<_insideRadius+2*_crustWidth+_ground+_air)//The air between the planet and the islands
+    {
+        mapValue = -999;
+    }
+    else if (dstFromWorldCenter < (_Radius+_insideRadius+2*_crustWidth+_ground+_air)/2) //The half bottom part of the islands
+    {
+        mapValue = 0;
+        mapValue = -1 / (dstFromWorldCenter - _insideRadius-2*_crustWidth-_ground-_air) - _sensitivity;
+
+        mapValue = noise(worldPos, mapValue, _islandsFrequency, _islandsAmplitude, _islandsOctaves);
+    }
+    else if (dstFromWorldCenter < _Radius)//the top halfpart of the islands
+    {
+        mapValue = 1 / (dstFromWorldCenter - _Radius) - _sensitivity;
+
+        mapValue = noise(worldPos, mapValue, _islandsFrequency, _islandsAmplitude, _islandsOctaves);
+    }
+    else
+    {
+        mapValue = 0.0f;
+    }
+    
+    _Weights[indexFromCoord(id.x, id.y, id.z)] = mapValue;
+}
