@@ -18,8 +18,8 @@ public class AnimatorManager : MonoBehaviour
     public void UpdateAnimatorValues(float horizontalMovement, float verticalMovement, bool isSprinting) {
         float snappedHorizontal;
         float snappedVertical;
+
         
-        /*
         #region Snapped Horizontal
         if (horizontalMovement > 0 && horizontalMovement<0.55f) {
             snappedHorizontal = 0.5f;
@@ -47,14 +47,22 @@ public class AnimatorManager : MonoBehaviour
         }
         #endregion
 
+        if(isSprinting) snappedHorizontal = 2;
+
         animator.SetFloat(horizontal, snappedHorizontal, 0.1f, Time.deltaTime);
         animator.SetFloat(vertical, snappedVertical, 0.1f, Time.deltaTime);
-        */
-        
-        if(isSprinting) horizontalMovement = 2;
 
+
+
+        /*
+         * if(isSprinting) horizontalMovement = 2;
         animator.SetFloat(horizontal, horizontalMovement, 0.1f, Time.deltaTime);
         animator.SetFloat(vertical, verticalMovement, 0.1f, Time.deltaTime);
-        
+        */
+    }
+
+    public void PlayerTargetAnimation(string targetAnimation, bool isInteracting) {
+        animator.SetBool("isInteracting", isInteracting);
+        animator.CrossFade(targetAnimation, 0.2f);
     }
 }
