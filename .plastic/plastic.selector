@@ -1,4 +1,0 @@
-repository "Practica@Eustakios@cloud"
-  path "/"
-    br "/main"
-    co "/main"
