@@ -58,6 +58,8 @@ public class WorldGenerator : MonoBehaviour
 
         chunkRadius += 1; //So terrain generated on the edge doesnt cut suddenly
 
+        Material material = new Material(Resources.Load<Shader>("Materials/Terrain Shaders/Planet Shader"));
+
         //Generate 3D array of chunks to keep trak of them and generate all chunks
         //worldChunks = new GameObject[(chunkRadius * 2) * (chunkRadius * 2) * (chunkRadius * 2)];
 
@@ -67,6 +69,7 @@ public class WorldGenerator : MonoBehaviour
                     // Instantiate the chunk
                     GameObject prefabChunk = Instantiate(Resources.Load<GameObject>("Prefabs/Chunk"), new Vector3(chunkX, chunkY, chunkZ) * GridMetrics.Scale, Quaternion.identity);
                     prefabChunk.transform.parent = world.transform;
+                    prefabChunk.GetComponent<Renderer>().material = material;
                 }
             }
         }

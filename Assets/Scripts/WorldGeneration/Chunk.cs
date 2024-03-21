@@ -37,8 +37,6 @@ public class Chunk : MonoBehaviour
         meshCollider = gameObject.GetComponent<MeshCollider>();
         meshRenderer = gameObject.GetComponent<MeshRenderer>();
 
-        meshRenderer.material = Resources.Load<Material>("Materials/Terrain");
-
         Create();
     }
 

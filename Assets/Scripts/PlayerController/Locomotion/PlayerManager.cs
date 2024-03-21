@@ -16,6 +16,7 @@ public class PlayerManager : MonoBehaviour
         inputManager = GetComponent<InputManager>();
         playerLocomotion = GetComponent<PlayerLocomotion>();
         animator = GetComponent<Animator>();
+        Debug.Log(Time.timeScale);
     }
 
     // Update is called once per frame
