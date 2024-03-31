@@ -13,8 +13,9 @@ public class WorldGenerator : MonoBehaviour
     public float groundPercentage = 0.1f;
     public float airPercentage = 0.05f; //Floating island be the remaining percentage
 
-    float insideRadius;
-    float ground;
+    public float planetRadius;
+    public float insideRadius;
+    public float ground;
 
     GameObject world;
 
@@ -26,17 +27,17 @@ public class WorldGenerator : MonoBehaviour
     }
 
     // Update is called once per frame
-    void setUpNoiseGenerator(float radius)
+    void setUpNoiseGenerator()
     {
         NoiseGenerator noiseGenerator = GetComponent<NoiseGenerator>();
         
-        noiseGenerator.radius = radius;
-        radius -= noiseGenerator.ground;
-        insideRadius = radius*0.40f;
+        noiseGenerator.radius = planetRadius;
+        planetRadius -= noiseGenerator.ground;
+        insideRadius = planetRadius*0.40f;
         noiseGenerator.insideRadius = insideRadius;
-        ground = radius * 0.10f;
+        ground = planetRadius * 0.10f;
         noiseGenerator.ground = ground;
-        noiseGenerator.air = radius * 0.05f;
+        noiseGenerator.air = planetRadius * 0.05f;
     }
 
     Material initWorldMaterial(Vector3 worldPos) {
@@ -47,13 +48,13 @@ public class WorldGenerator : MonoBehaviour
         return material;
     }
 
-    GameObject generateCore(float radius) {
+    GameObject generateCore() {
         GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         core.name = "Core";
         core.tag = "Terrain";
         core.layer = LayerMask.NameToLayer("Terrain");
         core.transform.position = Vector3.zero;
-        core.transform.localScale = Vector3.one*0.3f*radius;
+        core.transform.localScale = Vector3.one*0.3f*planetRadius;
         core.transform.parent = world.transform;
         return core;
     }
@@ -64,15 +65,16 @@ public class WorldGenerator : MonoBehaviour
         world.AddComponent<GravityAttractor>();
         world.transform.tag = "Planet";
         world.transform.position = Vector3.zero;
+        transform.position = Vector3.zero;
 
-        float radius = Random.Range((chunkRadius - 1.0f) * GridMetrics.Scale, chunkRadius * GridMetrics.Scale);
+        planetRadius = Random.Range((chunkRadius - 1.0f) * GridMetrics.Scale, chunkRadius * GridMetrics.Scale);
 
         //Create the core of the world
-        GameObject core = generateCore(radius);
+        GameObject core = generateCore();
 
         //Set the radius of the world in UNITS
 
-        setUpNoiseGenerator(radius);
+        setUpNoiseGenerator();
 
         chunkRadius += 1; //So terrain generated on the edge doesnt cut suddenly
 

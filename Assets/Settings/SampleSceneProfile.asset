@@ -145,9 +145,24 @@ MonoBehaviour:
   m_Name: AtmospherePost
   m_EditorClassIdentifier: 
   active: 1
-  tintIntenity:
+  planetCenter:
     m_OverrideState: 1
-    m_Value: 3
-  tintColor:
+    m_Value: {x: 0, y: 0, z: 0}
+  planetRadius:
     m_OverrideState: 1
-    m_Value: {r: 0.9150943, g: 0.22608215, b: 0, a: 1}
+    m_Value: 66.57
+  atmosphereRadius:
+    m_OverrideState: 1
+    m_Value: 85.4
+  numInScatteringPoints:
+    m_OverrideState: 1
+    m_Value: 5
+  numOutScatteringPoints:
+    m_OverrideState: 1
+    m_Value: 5
+  directionToSun:
+    m_OverrideState: 1
+    m_Value: {x: 0, y: 0, z: 0}
+  densityFalloff:
+    m_OverrideState: 1
+    m_Value: 7

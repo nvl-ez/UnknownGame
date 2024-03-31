@@ -44,8 +44,14 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
 
             if (atmospherePost != null && atmospherePost.IsActive()) {
 
-                _mat.SetColor("_OverlayColor", atmospherePost.tintColor.value);
-                _mat.SetFloat("_Intensity", atmospherePost.tintIntensity.value);
+                _mat.SetVector("_PlanetCenter", atmospherePost.planetCenter.value);
+                _mat.SetFloat("_PlanetRadius", atmospherePost.planetRadius.value);
+                _mat.SetFloat("_AtmosphereRadius", atmospherePost.atmosphereRadius.value);
+                _mat.SetInt("_NumInScatteringPoints", atmospherePost.numInScatteringPoints.value);
+                _mat.SetInt("_NumOutScatteringPoints", atmospherePost.numOutScatteringPoints.value);
+                _mat.SetVector("_DirectionToSun", atmospherePost.directionToSun.value);
+                _mat.SetFloat("_DensityFalloff", atmospherePost.densityFalloff.value);
+
 
                 Blit(commandBuffer, src, tint, _mat, 0);
                 Blit(commandBuffer, tint, src);
