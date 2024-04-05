@@ -18,6 +18,7 @@ Shader "Mine/Atmosphere"
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "UnityPBSLighting.cginc"
 
             sampler2D _MainTex;
             sampler2D _CameraDepthTexture;
@@ -29,6 +30,7 @@ Shader "Mine/Atmosphere"
             int _NumOutScatteringPoints;
             float3 _DirectionToSun;
             float _DensityFalloff;
+            float3 _ScatteringCoefficients;
 
             struct appdata
             {
@@ -42,6 +44,23 @@ Shader "Mine/Atmosphere"
                 float4 vertex : SV_POSITION;
                 float3 viewVector : TEXCOORD1; //represents the direction from the camera to each vertex in camera space.
             };
+
+            float3 interpolateColors(float3 col, float3 light, float min, float max, float val){
+                if (min >= max) {
+                    // Handle the error case, maybe return one of the colors or a default color
+                    return float3(1, 0, 0); // Example: return red to indicate an error
+                }
+
+                if (val <= min) {
+                    return col;
+                } else if (val >= max) {
+                    return light;
+                }
+                // Normalize val to a 0-1 range where min maps to 0 and max maps to 1
+                float t = (val - min) / (max - min);
+                // Interpolate between col and light based on the normalized val
+                return lerp(col, light, t);
+            }
 
             float2 raySphereIntersect(float3 rayOrg, float3 rayDir, float3 sphereCenter, float sphereRadius){
                 //o: rayOrg Origin of the ray
@@ -94,10 +113,11 @@ Shader "Mine/Atmosphere"
             }
 
             //Returns all the light that makes it to the camera 
-            float calculateLight(float3 rayOrg, float3 rayDir, float rayLength){
+            float3 calculateLight(float3 rayOrg, float3 rayDir, float rayLength, float3 col){
                 float3 inScatterPoint = rayOrg;
                 float stepSize = rayLength/(_NumInScatteringPoints-1);
-                float inScatteredLight = 0;
+                float3 inScatteredLight = 0;
+                float viewRayOpticalDepth = 0;
 
                 for(int i = 0; i<_NumInScatteringPoints; i++){
                     //Get the distance of the sun ray from the sun to the inScattering point evaluating rn
@@ -105,16 +125,17 @@ Shader "Mine/Atmosphere"
                     //Light might be lost from the sun ray (inside of the atmosphere) to the inScatter point
                     float sunRayOpticalDepth = opticalDepth(inScatterPoint, _DirectionToSun, sunRayLength);
                     //Light might be lost from the inScatter point to the camera
-                    float viewRayOpticalDepth = opticalDepth(inScatterPoint, -rayDir, stepSize*i);
+                    viewRayOpticalDepth = opticalDepth(inScatterPoint, -rayDir, stepSize*i);
                     //Transmittance is proportion of light that makes it to the inScatter point : As the optical depth increases, transmittance decreases exponentially
-                    float transmittance = exp(-(sunRayOpticalDepth+viewRayOpticalDepth));
+                    float3 transmittance = exp(-(sunRayOpticalDepth+viewRayOpticalDepth)*_ScatteringCoefficients);
 
                     float localDensity = densityAtPoint(inScatterPoint);
 
-                    inScatteredLight += localDensity*transmittance*stepSize;
+                    inScatteredLight += localDensity*transmittance*_ScatteringCoefficients*stepSize;
                     inScatterPoint += rayDir*stepSize;
                 }
-                return inScatteredLight;
+                float originalColTransmittance = exp(-viewRayOpticalDepth);
+                return col *originalColTransmittance + inScatteredLight;
             }
 
             v2f vert (appdata v)
@@ -146,15 +167,17 @@ Shader "Mine/Atmosphere"
                 float3 rayOrg = _WorldSpaceCameraPos;
                 float3 rayDir = normalize(i.viewVector);
 
-                float2 hit = raySphereIntersect(rayOrg, rayDir, _PlanetCenter, _PlanetRadius);
+                float2 hit = raySphereIntersect(rayOrg, rayDir, _PlanetCenter, _AtmosphereRadius);
                 float dstToAtmosphere = hit.x;
                 float dstThroughAtmosphere = min(hit.y, sceneDepth-dstToAtmosphere);
 
                 if(dstThroughAtmosphere>0){
                     float3 pointInAtmosphere = rayOrg+rayDir*dstToAtmosphere;
-                    float light = calculateLight(pointInAtmosphere, rayDir, dstThroughAtmosphere);
-                    return col*(1-light)+light;
+                    float3 light = calculateLight(pointInAtmosphere, rayDir, dstThroughAtmosphere, col);
+                    float3 colors = interpolateColors(col, light, 10, 20, dstThroughAtmosphere);
+                    return float4(colors, 0);
                 }
+
                 return col;
             }
             ENDCG

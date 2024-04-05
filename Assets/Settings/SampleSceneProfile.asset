@@ -150,19 +150,25 @@ MonoBehaviour:
     m_Value: {x: 0, y: 0, z: 0}
   planetRadius:
     m_OverrideState: 1
-    m_Value: 66.57
+    m_Value: 42.54
   atmosphereRadius:
     m_OverrideState: 1
-    m_Value: 85.4
+    m_Value: 70
   numInScatteringPoints:
     m_OverrideState: 1
     m_Value: 5
   numOutScatteringPoints:
     m_OverrideState: 1
-    m_Value: 5
+    m_Value: 30
   directionToSun:
     m_OverrideState: 1
     m_Value: {x: 0, y: 0, z: 0}
   densityFalloff:
     m_OverrideState: 1
     m_Value: 7
+  wavelengths:
+    m_OverrideState: 1
+    m_Value: {x: 700, y: 530, z: 440}
+  scatteringStrength:
+    m_OverrideState: 1
+    m_Value: 0.7

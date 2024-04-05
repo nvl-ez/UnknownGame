@@ -30,14 +30,17 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
     void UpdateAtmosphereSettings(bool updating) {
         if (atmospherePost != null && worldGenerator != null) {
             // Set the world Position
-            atmospherePost.planetCenter= new Vector3Parameter(worldGenerator.transform.position);
+            atmospherePost.planetCenter.Override(worldGenerator.transform.position);
 
             //Set the sun position
-            atmospherePost.directionToSun = new Vector3Parameter((sun.transform.position - worldGenerator.transform.position).normalized);
+            atmospherePost.directionToSun.Override((sun.transform.position - worldGenerator.transform.position).normalized);
 
             if (!updating) {
                 //Set the world radius
-                atmospherePost.planetRadius.Override(worldGenerator.insideRadius + worldGenerator.ground/2);
+                atmospherePost.planetRadius.Override(1);
+
+                //Set the atmosphere radius;
+                atmospherePost.atmosphereRadius.Override(worldGenerator.planetRadius);
 
                 //set inScattering points
                 atmospherePost.numInScatteringPoints.Override(5);
@@ -47,6 +50,12 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
 
                 //set density falloff points
                 atmospherePost.densityFalloff.Override(5);
+
+                //set the wavelengths
+                atmospherePost.wavelengths.Override(new Vector3(700, 530, 440));
+
+                //set the scattering Strength
+                atmospherePost.scatteringStrength.Override(1);
             }
             
         }

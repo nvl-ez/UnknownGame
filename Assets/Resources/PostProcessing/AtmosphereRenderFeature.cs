@@ -6,6 +6,7 @@ using UnityEngine.Rendering.Universal;
 public class AtmosphereRenderFeature : ScriptableRendererFeature {
     private AtmospherePass atmospherePass;
 
+
     public override void Create() {
         atmospherePass = new AtmospherePass();
     }
@@ -15,6 +16,7 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
     }
 
     class AtmospherePass : ScriptableRenderPass {
+        static Vector3 scatteringCoefficients = Vector3.zero;
         private Material _mat;
         int tintId = Shader.PropertyToID("_Temp");
         RenderTargetIdentifier src, tint;
@@ -43,6 +45,10 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
             AtmospherePost atmospherePost = volumes.GetComponent<AtmospherePost>();
 
             if (atmospherePost != null && atmospherePost.IsActive()) {
+                //Calculate the coeffitients
+                scatteringCoefficients.x = Mathf.Pow(400 / atmospherePost.wavelengths.value.x, 4) * atmospherePost.scatteringStrength.value;
+                scatteringCoefficients.y = Mathf.Pow(400 / atmospherePost.wavelengths.value.y, 4) * atmospherePost.scatteringStrength.value;
+                scatteringCoefficients.z = Mathf.Pow(400 / atmospherePost.wavelengths.value.z, 4) * atmospherePost.scatteringStrength.value;
 
                 _mat.SetVector("_PlanetCenter", atmospherePost.planetCenter.value);
                 _mat.SetFloat("_PlanetRadius", atmospherePost.planetRadius.value);
@@ -51,6 +57,9 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
                 _mat.SetInt("_NumOutScatteringPoints", atmospherePost.numOutScatteringPoints.value);
                 _mat.SetVector("_DirectionToSun", atmospherePost.directionToSun.value);
                 _mat.SetFloat("_DensityFalloff", atmospherePost.densityFalloff.value);
+                _mat.SetVector("_ScatteringCoefficients", scatteringCoefficients);
+
+                
 
 
                 Blit(commandBuffer, src, tint, _mat, 0);

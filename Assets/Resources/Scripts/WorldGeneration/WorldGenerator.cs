@@ -16,6 +16,7 @@ public class WorldGenerator : MonoBehaviour
     public float planetRadius;
     public float insideRadius;
     public float ground;
+    public float air;
 
     GameObject world;
 
@@ -37,7 +38,8 @@ public class WorldGenerator : MonoBehaviour
         noiseGenerator.insideRadius = insideRadius;
         ground = planetRadius * 0.10f;
         noiseGenerator.ground = ground;
-        noiseGenerator.air = planetRadius * 0.05f;
+        air = planetRadius * 0.05f;
+        noiseGenerator.air = air;
     }
 
     Material initWorldMaterial(Vector3 worldPos) {
