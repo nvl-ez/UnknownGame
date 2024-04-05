@@ -31,7 +31,8 @@ public class WorldGenerator : MonoBehaviour
     void setUpNoiseGenerator()
     {
         NoiseGenerator noiseGenerator = GetComponent<NoiseGenerator>();
-        
+        planetRadius = Random.Range((chunkRadius - 1.0f) * GridMetrics.Scale, chunkRadius * GridMetrics.Scale);
+
         noiseGenerator.radius = planetRadius;
         planetRadius -= noiseGenerator.ground;
         insideRadius = planetRadius*0.40f;
@@ -61,22 +62,27 @@ public class WorldGenerator : MonoBehaviour
         return core;
     }
 
+    void addGravity() {
+        world.AddComponent<SphereCollider>();
+        world.AddComponent<GravityAreaCenter>();
+        world.GetComponent<SphereCollider>().radius = planetRadius*1.5f;
+    }
+
     void generate() {
+        
+
         //Parent object for all chunks and responsible for Gravity
         world = new GameObject("World");
-        world.AddComponent<GravityAttractor>();
+
         world.transform.tag = "Planet";
         world.transform.position = Vector3.zero;
         transform.position = Vector3.zero;
 
-        planetRadius = Random.Range((chunkRadius - 1.0f) * GridMetrics.Scale, chunkRadius * GridMetrics.Scale);
-
         //Create the core of the world
-        GameObject core = generateCore();
-
-        //Set the radius of the world in UNITS
 
         setUpNoiseGenerator();
+        addGravity();
+        GameObject core = generateCore();
 
         chunkRadius += 1; //So terrain generated on the edge doesnt cut suddenly
 

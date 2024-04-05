@@ -150,10 +150,10 @@ MonoBehaviour:
     m_Value: {x: 0, y: 0, z: 0}
   planetRadius:
     m_OverrideState: 1
-    m_Value: 42.54
+    m_Value: 1
   atmosphereRadius:
     m_OverrideState: 1
-    m_Value: 70
+    m_Value: 110.7
   numInScatteringPoints:
     m_OverrideState: 1
     m_Value: 5

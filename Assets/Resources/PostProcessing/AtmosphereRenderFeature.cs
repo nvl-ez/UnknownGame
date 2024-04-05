@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -54,11 +55,10 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
                 _mat.SetFloat("_PlanetRadius", atmospherePost.planetRadius.value);
                 _mat.SetFloat("_AtmosphereRadius", atmospherePost.atmosphereRadius.value);
                 _mat.SetInt("_NumInScatteringPoints", atmospherePost.numInScatteringPoints.value);
-                _mat.SetInt("_NumOutScatteringPoints", atmospherePost.numOutScatteringPoints.value);
                 _mat.SetVector("_DirectionToSun", atmospherePost.directionToSun.value);
                 _mat.SetFloat("_DensityFalloff", atmospherePost.densityFalloff.value);
                 _mat.SetVector("_ScatteringCoefficients", scatteringCoefficients);
-
+                _mat.SetTexture("_BakedOpticalDepth", atmospherePost.bakedOpticalDepth.value);
                 
 
 

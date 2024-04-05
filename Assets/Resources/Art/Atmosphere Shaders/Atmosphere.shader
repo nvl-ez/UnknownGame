@@ -27,10 +27,10 @@ Shader "Mine/Atmosphere"
             float _PlanetRadius;
             float _AtmosphereRadius;
             int _NumInScatteringPoints;
-            int _NumOutScatteringPoints;
             float3 _DirectionToSun;
             float _DensityFalloff;
             float3 _ScatteringCoefficients;
+            sampler2D _BakedOpticalDepth;
 
             struct appdata
             {
@@ -89,6 +89,29 @@ Shader "Mine/Atmosphere"
 
                 return float2(-1, 0);
             }
+            
+            float opticalDepthBaked(float3 rayOrigin, float3 rayDir) {
+				float height = length(rayOrigin - _PlanetCenter) - _PlanetRadius;
+				float height01 = saturate(height / (_AtmosphereRadius - _PlanetRadius));
+
+				float uvX = 1 - (dot(normalize(rayOrigin - _PlanetCenter), rayDir) * .5 + .5);
+				return tex2Dlod(_BakedOpticalDepth, float4(uvX, height01,0,0));
+			}
+
+			float opticalDepthBaked2(float3 rayOrigin, float3 rayDir, float rayLength) {
+				float3 endPoint = rayOrigin + rayDir * rayLength;
+				float d = dot(rayDir, normalize(rayOrigin-_PlanetCenter));
+				float opticalDepth = 0;
+
+				const float blendStrength = 1.5;
+				float w = saturate(d * blendStrength + .5);
+				
+				float d1 = opticalDepthBaked(rayOrigin, rayDir) - opticalDepthBaked(endPoint, rayDir);
+				float d2 = opticalDepthBaked(endPoint, -rayDir) - opticalDepthBaked(rayOrigin, -rayDir);
+
+				opticalDepth = lerp(d2, d1, w);
+				return opticalDepth;
+			}
 
             //Calculates the density at a point in the atmosphere
             float densityAtPoint(float3 pointSample){
@@ -96,20 +119,6 @@ Shader "Mine/Atmosphere"
                 float height01 = heightAboveSurface/(_AtmosphereRadius-_PlanetRadius);
                 float localDensity = exp(-height01*_DensityFalloff)*(1-height01);
                 return localDensity;
-            }
-
-            //Does the same as the calculateLight function but from the surface of the atmosphere to a inScatterPoint
-            float opticalDepth(float3 rayOrg, float3 rayDir, float3 rayLength){
-                float3 densitySamplePoint = rayOrg;
-                float stepSize = rayLength/(_NumOutScatteringPoints-1);
-                float opticalDepth = 0;
-
-                for(int i = 0; i<_NumOutScatteringPoints; i++){
-                    float localDensity = densityAtPoint(densitySamplePoint);
-                    opticalDepth += localDensity*stepSize;
-                    densitySamplePoint += rayDir*stepSize;
-                }
-                return opticalDepth;
             }
 
             //Returns all the light that makes it to the camera 
@@ -123,13 +132,15 @@ Shader "Mine/Atmosphere"
                     //Get the distance of the sun ray from the sun to the inScattering point evaluating rn
                     float sunRayLength = raySphereIntersect(inScatterPoint, _DirectionToSun, _PlanetCenter, _AtmosphereRadius).y;
                     //Light might be lost from the sun ray (inside of the atmosphere) to the inScatter point
-                    float sunRayOpticalDepth = opticalDepth(inScatterPoint, _DirectionToSun, sunRayLength);
+                    float sunRayOpticalDepth = opticalDepthBaked(inScatterPoint, _DirectionToSun);
+
+                    float localDensity = densityAtPoint(inScatterPoint);
+
                     //Light might be lost from the inScatter point to the camera
-                    viewRayOpticalDepth = opticalDepth(inScatterPoint, -rayDir, stepSize*i);
+                    viewRayOpticalDepth = opticalDepthBaked2(rayOrg, rayDir, stepSize*i);
                     //Transmittance is proportion of light that makes it to the inScatter point : As the optical depth increases, transmittance decreases exponentially
                     float3 transmittance = exp(-(sunRayOpticalDepth+viewRayOpticalDepth)*_ScatteringCoefficients);
 
-                    float localDensity = densityAtPoint(inScatterPoint);
 
                     inScatteredLight += localDensity*transmittance*_ScatteringCoefficients*stepSize;
                     inScatterPoint += rayDir*stepSize;
