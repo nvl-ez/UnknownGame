@@ -107,7 +107,7 @@ MonoBehaviour:
   active: 1
   mode:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 2
   neutralHDRRangeReductionMode:
     m_OverrideState: 0
     m_Value: 2
@@ -156,10 +156,7 @@ MonoBehaviour:
     m_Value: 110.7
   numInScatteringPoints:
     m_OverrideState: 1
-    m_Value: 5
-  numOutScatteringPoints:
-    m_OverrideState: 1
-    m_Value: 30
+    m_Value: 10
   directionToSun:
     m_OverrideState: 1
     m_Value: {x: 0, y: 0, z: 0}
@@ -172,3 +169,7 @@ MonoBehaviour:
   scatteringStrength:
     m_OverrideState: 1
     m_Value: 0.7
+  bakedOpticalDepth:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1

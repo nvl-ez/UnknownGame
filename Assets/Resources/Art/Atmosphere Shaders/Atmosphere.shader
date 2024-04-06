@@ -8,7 +8,7 @@ Shader "Mine/Atmosphere"
     }
     SubShader
     {
-        //Tags {"RenderType"="Opaque" "RenderPipeline"="UniversalPipeline"}
+        Tags {"RenderPipeline"="UniversalPipeline"}
         Cull Off ZWrite Off ZTest Always
 
         Pass

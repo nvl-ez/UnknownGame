@@ -26,7 +26,8 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: f82b5d4b9a01f1044b35698f2e9a55e1, type: 2}
+  m_SkyboxMaterial: {fileID: -876546973899608171, guid: 04b2c26642b5c104dac6a5dfc4d940f1,
+    type: 3}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 410087040}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.0008677906, g: 0, b: 0.020544313, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -696,6 +697,10 @@ MonoBehaviour:
   atmospherePost: {fileID: 0}
   worldGenerator: {fileID: 1135438512}
   sun: {fileID: 0}
+  opticalDepthCompute: {fileID: 0}
+  opticalDepthTexture: {fileID: 0}
+  textureSize: 256
+  opticalDepthPoints: 10
 --- !u!1 &1135438509
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,7 +773,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 269b19d80e5a0a04a8e2288a959234eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkRadius: 3
+  chunkRadius: 4
   cavePercentage: 0.3
   groundPercentage: 0.2
   airPercentage: 0.05
