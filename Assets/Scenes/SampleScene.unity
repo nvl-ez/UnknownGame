@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 410087040}
-  m_IndirectSpecularColor: {r: 0.0008677906, g: 0, b: 0.020544313, a: 1}
+  m_IndirectSpecularColor: {r: 0.005518226, g: 0.0044764504, b: 0.021663126, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -749,8 +749,8 @@ MonoBehaviour:
   caveAmplitude: 10
   caveFrequency: 0.05
   caveOctaves: 2
-  groundAmplitude: 10
-  groundFrequency: 0.02
+  groundAmplitude: 2
+  groundFrequency: 0.1
   groundOctaves: 2
   islandsAmplitude: 3
   islandsFrequency: 0.01
