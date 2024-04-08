@@ -13,10 +13,15 @@ public class WorldGenerator : MonoBehaviour
     public float groundPercentage = 0.1f;
     public float airPercentage = 0.05f; //Floating island be the remaining percentage
 
+    [Header("World Stats")]
     public float planetRadius;
     public float insideRadius;
     public float ground;
     public float air;
+
+    [Header("Atmosphere Properties")]
+    public Material mat;
+    public Color skyColor;
 
     GameObject world;
 
@@ -24,7 +29,25 @@ public class WorldGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        //Generate world
         generate();
+
+        //Setup skybox
+        setUpSkybox();
+
+    }
+
+    private void Update() {
+        
+    }
+
+    //setup skybox
+    void setUpSkybox() {
+        mat = new Material(Resources.Load<Shader>("Art/Atmosphere Shaders/SkyboxShader"));
+        mat.SetColor("_SkyColor", skyColor);
+        mat.SetVector("_PlanetCenter", world.transform.position);
+        mat.SetFloat("_AtmosphereRadius", planetRadius);
+        mat.SetFloat("_PlanetRadius", insideRadius+ground+air);
     }
 
     // Update is called once per frame
