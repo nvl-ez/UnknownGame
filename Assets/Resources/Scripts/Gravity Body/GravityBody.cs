@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class GravityBody : MonoBehaviour
 {
-    public static float GRAVITY_FORCE = 8;
+    public static float GRAVITY_FORCE = 16;
     
     public Vector3 GravityDirection
     {

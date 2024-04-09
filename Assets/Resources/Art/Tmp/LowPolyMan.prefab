@@ -42,17 +42,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c4ec2a6fc5b68114abbefce625d87a6b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.06
+      value: -9.83
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4ec2a6fc5b68114abbefce625d87a6b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 221.6
+      value: 225.54
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4ec2a6fc5b68114abbefce625d87a6b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.3
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c4ec2a6fc5b68114abbefce625d87a6b,
         type: 3}
@@ -94,6 +94,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: LowPolyMan
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: c4ec2a6fc5b68114abbefce625d87a6b,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 1039a99873c70e44e9bba047c3990542, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -126,6 +131,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7918850134154646340}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c4ec2a6fc5b68114abbefce625d87a6b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4232076254286322596}
   m_SourcePrefab: {fileID: 100100000, guid: c4ec2a6fc5b68114abbefce625d87a6b, type: 3}
 --- !u!1 &7263636488823222745 stripped
 GameObject:
@@ -146,8 +155,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movementInput: {x: 0, y: 0}
+  moveAmount: 0
   verticalInput: 0
   horizontalInput: 0
+  sprintingInput: 0
+  jumpInput: 0
 --- !u!54 &6188329944027514848
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -209,9 +221,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.2
-  m_Height: 1.8
+  m_Height: 1.6
   m_Direction: 1
-  m_Center: {x: 0, y: 0.9, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &2065234633583573379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,8 +238,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDirection: {x: 0, y: 0, z: 0}
   targetDirection: {x: 0, y: 0, z: 0}
-  movementSpeed: 7
+  leapingVelocity: 3
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  walkingSpeed: 3
+  runningSpeed: 5
+  sprintingSpeed: 8
   rotationSpeed: 15
+  jumpHeight: 0.5
+  isSprinting: 0
+  isGrounded: 0
+  isJumping: 0
 --- !u!114 &7918850134154646340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -240,6 +262,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94e18a791a24a804b9d44b9cd718fe3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isInteracting: 0
+--- !u!114 &4232076254286322596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7263636488823222745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe4756cadec09d439fa1c3f0c8df1b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
 --- !u!4 &8036196666693380963 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c4ec2a6fc5b68114abbefce625d87a6b,

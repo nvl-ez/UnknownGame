@@ -43,6 +43,9 @@ public class PlayerLocomotion : MonoBehaviour
         gravityBody = GetComponent<GravityBody>();
         playerManager = GetComponent<PlayerManager>();
         animatorManager = GetComponent<AnimatorManager>();
+
+        playerRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+        playerRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     public void handleAllMovement() {
@@ -76,7 +79,11 @@ public class PlayerLocomotion : MonoBehaviour
             }
         }
         // Apply the calculated velocity to the player's Rigidbody.
-        playerRigidbody.velocity = moveDirection + currentVerticalVelocity;
+        if(!isGrounded) {
+            playerRigidbody.velocity = moveDirection + currentVerticalVelocity;
+        } else {
+            playerRigidbody.velocity = moveDirection;
+        }
     }
 
     private void handleRotation() {
@@ -110,28 +117,53 @@ public class PlayerLocomotion : MonoBehaviour
     }
 
     Vector3 rayCastOrigin;
+    Vector3 targetPosition;
 
     private void handleFallingAndLanding() {
         RaycastHit hit;
         rayCastOrigin = transform.position;
         rayCastOrigin += gravityBody.GravityDirection * -0.5f;
+        targetPosition = transform.position;
 
         if (!isGrounded && !isJumping) {
             if (!playerManager.isInteracting) {
                 animatorManager.playTargetAnimation("FallingLoop", true);
             }
-            playerRigidbody.AddForce(transform.forward*leapingVelocity);
+            playerRigidbody.AddForce(gravityBody.force);
         }
 
-        playerRigidbody.AddForce(gravityBody.force, ForceMode.Acceleration);
-
-        if (Physics.SphereCast(rayCastOrigin, 0.2f, gravityBody.GravityDirection, out hit, 0.70f,groundLayer)&&!isJumping) {
+        if (Physics.SphereCast(rayCastOrigin, 0.1f, gravityBody.GravityDirection, out hit, 0.55f, groundLayer) && !isJumping) {
             if(!isGrounded && !playerManager.isInteracting) {
                 animatorManager.playTargetAnimation("RollForward", true);
             }
+
+            Vector3 rayCastHitPoint = hit.point;
+            // Calculate the vector from the current position to the hit point
+            Vector3 toHitPoint = rayCastHitPoint - transform.position;
+            // Project this vector onto the gravity direction to get the height adjustment
+            Vector3 heightAdjustment = Vector3.Project(toHitPoint, gravityBody.GravityDirection);
+            // Adjust the target position by the height adjustment along the gravity direction
+            targetPosition += heightAdjustment;
+
             isGrounded = true;
         } else {
             isGrounded = false;
+        }
+
+        
+        if(isGrounded && !isJumping) {
+            if(playerManager.isInteracting || inputManager.moveAmount>0) {
+                transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime / 0.1f);
+            } else {
+                transform.position = targetPosition;
+            }
+        }
+    }
+
+    private void OnDrawGizmos() {
+        if (Application.isPlaying) {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(targetPosition, 0.1f);
         }
     }
 
@@ -152,22 +184,5 @@ public class PlayerLocomotion : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos() {
-        if (Application.isPlaying) {
-            //Draw grounded detection
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(rayCastOrigin, rayCastOrigin + (gravityBody.GravityDirection * 0.40f));
-
-            //Draw velocity
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(rayCastOrigin, rayCastOrigin + (playerRigidbody.velocity * 0.40f));
-        }
-    }
-
-    private Vector3 mask(Vector3 org, Vector3 mask) {
-        org.x *= mask.x;
-        org.y *= mask.y;
-        org.z *= mask.z;
-        return org;
-    }
+    
 }
