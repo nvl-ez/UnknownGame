@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
@@ -30,10 +32,19 @@ public class PlayerLocomotion : MonoBehaviour
     public float rotationSpeed = 15;
     public float jumpHeight = 3;
 
+    [Header("Movement Properties")]
+    public float maxAngle = 50f;
+    public float slidingSpeed = 8f;
+    public float rayCastLength = 0.7f;
+
     [Header("Movement Flags")]
     public bool isSprinting = false;
     public bool isGrounded = false;
     public bool isJumping = false;
+    public bool isSliding = false;
+
+
+    Vector3 terrainNormal = Vector3.zero;
 
 
     private void Awake() {
@@ -79,10 +90,15 @@ public class PlayerLocomotion : MonoBehaviour
             }
         }
         // Apply the calculated velocity to the player's Rigidbody.
-        if(!isGrounded) {
-            playerRigidbody.velocity = moveDirection + currentVerticalVelocity;
+        if (!isSliding) {
+            if (!isGrounded) {
+                playerRigidbody.velocity = moveDirection + currentVerticalVelocity;
+            } else {
+                playerRigidbody.velocity = moveDirection;
+            }
         } else {
-            playerRigidbody.velocity = moveDirection;
+            Vector3 slidingDirection = Vector3.ProjectOnPlane(gravityBody.force, terrainNormal).normalized;
+            playerRigidbody.velocity = slidingDirection*slidingSpeed;
         }
     }
 
@@ -113,16 +129,16 @@ public class PlayerLocomotion : MonoBehaviour
         Quaternion playerRotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
         // Apply the calculated rotation to the player.
-        transform.rotation = playerRotation;
+        if(moveDirection.magnitude >0.1)transform.rotation = playerRotation;
     }
-
     Vector3 rayCastOrigin;
     Vector3 targetPosition;
+    Vector3 rayCastHitPoint;
 
     private void handleFallingAndLanding() {
         RaycastHit hit;
         rayCastOrigin = transform.position;
-        rayCastOrigin += gravityBody.GravityDirection * -0.5f;
+        rayCastOrigin += gravityBody.GravityDirection * -rayCastLength;
         targetPosition = transform.position;
 
         if (!isGrounded && !isJumping) {
@@ -132,12 +148,12 @@ public class PlayerLocomotion : MonoBehaviour
             playerRigidbody.AddForce(gravityBody.force);
         }
 
-        if (Physics.SphereCast(rayCastOrigin, 0.1f, gravityBody.GravityDirection, out hit, 0.55f, groundLayer) && !isJumping) {
+        if (Physics.SphereCast(rayCastOrigin, 0.2f, gravityBody.GravityDirection, out hit, rayCastLength+0.35f, groundLayer)&&!isJumping) {
             if(!isGrounded && !playerManager.isInteracting) {
                 animatorManager.playTargetAnimation("RollForward", true);
             }
 
-            Vector3 rayCastHitPoint = hit.point;
+            rayCastHitPoint = hit.point;
             // Calculate the vector from the current position to the hit point
             Vector3 toHitPoint = rayCastHitPoint - transform.position;
             // Project this vector onto the gravity direction to get the height adjustment
@@ -145,15 +161,30 @@ public class PlayerLocomotion : MonoBehaviour
             // Adjust the target position by the height adjustment along the gravity direction
             targetPosition += heightAdjustment;
 
+            //Calculate the slope of the floor and set the sliding flag
+            //Uses the raycast to verify ground in the case of not hitting an element, this solves the edgecase of stairs
+            RaycastHit rayHit;
+            if(Physics.Raycast(rayCastOrigin, gravityBody.GravityDirection, out rayHit, 1.5f * rayCastLength, groundLayer)) {
+                terrainNormal = rayHit.normal;
+            } else {
+                terrainNormal = hit.normal;
+            }
+            
+            float terrainAngle = Vector3.Angle(-gravityBody.GravityDirection, terrainNormal);
+            if (terrainAngle >= maxAngle && isGrounded) {
+                isSliding = true;
+            } else {
+                isSliding = false;
+            }
+
             isGrounded = true;
         } else {
             isGrounded = false;
         }
-
         
         if(isGrounded && !isJumping) {
-            if(playerManager.isInteracting || inputManager.moveAmount>0) {
-                transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime / 0.1f);
+            if(playerManager.isInteracting || inputManager.moveAmount>0 || isSliding) {
+                transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime/0.05f);
             } else {
                 transform.position = targetPosition;
             }
@@ -162,13 +193,22 @@ public class PlayerLocomotion : MonoBehaviour
 
     private void OnDrawGizmos() {
         if (Application.isPlaying) {
+            //Draw target position
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(targetPosition, 0.1f);
+            Gizmos.DrawWireSphere(targetPosition, 0.2f);
+
+            //Actual hit
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(rayCastHitPoint, 0.2f);
+
+            //Hit ray
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(rayCastOrigin, rayCastOrigin+(gravityBody.GravityDirection*(rayCastLength+0.35f)));
         }
     }
 
     public void handleJumping() {
-        if (isGrounded && !isJumping) {
+        if (isGrounded && !isJumping && !isSliding) {
             animatorManager.animator.SetBool("isJumping", true);
             animatorManager.playTargetAnimation("Jump", false);
 
