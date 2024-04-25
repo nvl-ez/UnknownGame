@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
 public class GravityBody : MonoBehaviour
 {
@@ -26,17 +25,19 @@ public class GravityBody : MonoBehaviour
 
     void Awake()
     {
-        _rigidbody = transform.GetComponent<Rigidbody>();
+        if(!grabValues)_rigidbody = transform.GetComponent<Rigidbody>();
         _gravityAreas = new List<GravityArea>();
     }
 
-    private void FixedUpdate() {
+    private void Update() {
         force = GravityDirection * (GRAVITY_FORCE);
-        if(!grabValues)_rigidbody.AddForce(force, ForceMode.Acceleration);
+        if (!grabValues) {
+            _rigidbody.AddForce(force, ForceMode.Acceleration);
 
-        Quaternion upRotation = Quaternion.FromToRotation(transform.up, -GravityDirection);
-        Quaternion newRotation = Quaternion.Slerp(_rigidbody.rotation, upRotation * _rigidbody.rotation, 0.3f);
-        if (!grabValues) _rigidbody.MoveRotation(newRotation);
+            Quaternion upRotation = Quaternion.FromToRotation(transform.up, -GravityDirection);
+            Quaternion newRotation = Quaternion.Slerp(_rigidbody.rotation, upRotation * _rigidbody.rotation, 0.3f);
+            _rigidbody.MoveRotation(newRotation);
+        }
     }
 
     public void AddGravityArea(GravityArea gravityArea)

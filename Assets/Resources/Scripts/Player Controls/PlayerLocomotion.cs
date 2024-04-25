@@ -46,6 +46,9 @@ public class PlayerLocomotion : MonoBehaviour
 
     Vector3 terrainNormal = Vector3.zero;
 
+    Vector3 realForward;
+    Vector3 realRight;
+
 
     private void Awake() {
         cameraObject = Camera.main.transform;
@@ -60,9 +63,9 @@ public class PlayerLocomotion : MonoBehaviour
     }
 
     public void handleAllMovement() {
+        handleRotation();
         handleFallingAndLanding();
         handleMovement();
-        handleRotation();   
     }
 
     private void handleMovement() {
@@ -98,7 +101,7 @@ public class PlayerLocomotion : MonoBehaviour
             }
         } else {
             Vector3 slidingDirection = Vector3.ProjectOnPlane(gravityBody.force, terrainNormal).normalized;
-            playerRigidbody.velocity = slidingDirection*slidingSpeed;
+            playerRigidbody.velocity = Vector3.Lerp(playerRigidbody.velocity, slidingDirection*slidingSpeed, Time.deltaTime/0.1f);
         }
     }
 
@@ -129,7 +132,12 @@ public class PlayerLocomotion : MonoBehaviour
         Quaternion playerRotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
         // Apply the calculated rotation to the player.
-        if(moveDirection.magnitude >0.1)transform.rotation = playerRotation;
+        if (moveDirection.magnitude > 0.1) {
+            realForward = forwardOnPlane;
+            realRight = Vector3.Cross(gravityDirection, realForward);
+
+            transform.rotation = playerRotation;
+        }
     }
     Vector3 rayCastOrigin;
     Vector3 targetPosition;
@@ -164,7 +172,7 @@ public class PlayerLocomotion : MonoBehaviour
             //Calculate the slope of the floor and set the sliding flag
             //Uses the raycast to verify ground in the case of not hitting an element, this solves the edgecase of stairs
             RaycastHit rayHit;
-            if(Physics.Raycast(rayCastOrigin, gravityBody.GravityDirection, out rayHit, 1.5f * rayCastLength, groundLayer)) {
+            if(Physics.Raycast(rayCastOrigin+realForward*0.1f, gravityBody.GravityDirection + realForward * 0.1f, out rayHit, 1.5f * rayCastLength, groundLayer)) {
                 terrainNormal = rayHit.normal;
             } else {
                 terrainNormal = hit.normal;
@@ -203,7 +211,8 @@ public class PlayerLocomotion : MonoBehaviour
 
             //Hit ray
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(rayCastOrigin, rayCastOrigin+(gravityBody.GravityDirection*(rayCastLength+0.35f)));
+            //Gizmos.DrawLine(rayCastOrigin+forward*0.1f, rayCastOrigin+forward*0.1f+(gravityBody.GravityDirection*(rayCastLength+0.35f)));
+            Gizmos.DrawLine(rayCastOrigin,realForward);
         }
     }
 
