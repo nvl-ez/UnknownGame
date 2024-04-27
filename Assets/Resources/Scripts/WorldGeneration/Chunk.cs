@@ -25,7 +25,6 @@ public class Chunk : MonoBehaviour
     MeshCollider meshCollider;
 
     public void Awake() {
-        gameObject.layer = LayerMask.NameToLayer("Terrain");
         transform.tag = "Terrain";
         transform.name = transform.position.ToString();
 

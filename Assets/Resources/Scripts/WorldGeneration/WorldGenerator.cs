@@ -78,7 +78,6 @@ public class WorldGenerator : MonoBehaviour
         GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         core.name = "Core";
         core.tag = "Terrain";
-        core.layer = LayerMask.NameToLayer("Terrain");
         core.transform.position = Vector3.zero;
         core.transform.localScale = Vector3.one*0.3f*planetRadius;
         core.transform.parent = world.transform;
@@ -87,7 +86,7 @@ public class WorldGenerator : MonoBehaviour
 
     void addGravity() {
         world.AddComponent<SphereCollider>();
-        world.AddComponent<GravityAreaCenter>();
+        //world.AddComponent<GravityAreaCenter>();
         world.GetComponent<SphereCollider>().radius = planetRadius*1.5f;
     }
 

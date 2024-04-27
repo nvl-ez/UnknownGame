@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Proyect
 {
-    public class InputHandler : MonoBehaviour
+    public class InputManager : MonoBehaviour
     {
         PlayerInputs playerInputs;
 
