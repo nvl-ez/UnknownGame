@@ -1,10 +1,12 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 [Serializable, VolumeComponentMenuForRenderPipeline("Mine/Atmosphere", typeof(UniversalRenderPipeline))]
 public class AtmospherePost : VolumeComponent, IPostProcessComponent {
+    public BoolParameter activeState = new BoolParameter(true);
     public Vector3Parameter planetCenter = new Vector3Parameter(Vector3.zero);
     public FloatParameter planetRadius = new FloatParameter(100);
     public FloatParameter atmosphereRadius = new FloatParameter(100);
@@ -15,6 +17,8 @@ public class AtmospherePost : VolumeComponent, IPostProcessComponent {
     public FloatParameter scatteringStrength = new FloatParameter(1);
     public TextureParameter bakedOpticalDepth = new TextureParameter(null);
 
-    public bool IsActive() => true;
+    public bool IsActive() {
+        return activeState.value;
+    }
     public bool IsTileCompatible() => true;
 }

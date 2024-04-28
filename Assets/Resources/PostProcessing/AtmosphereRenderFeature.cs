@@ -45,6 +45,13 @@ public class AtmosphereRenderFeature : ScriptableRendererFeature {
             VolumeStack volumes = VolumeManager.instance.stack;
             AtmospherePost atmospherePost = volumes.GetComponent<AtmospherePost>();
 
+
+            if (!atmospherePost.IsActive()) {
+                CommandBufferPool.Release(commandBuffer);
+                return;
+            }
+   
+
             if (atmospherePost != null && atmospherePost.IsActive()) {
                 //Calculate the coeffitients
                 scatteringCoefficients.x = Mathf.Pow(400 / atmospherePost.wavelengths.value.x, 4) * atmospherePost.scatteringStrength.value;

@@ -1,11 +1,13 @@
 {
   "dependencies": {
-    "com.kylewbanks.scenerefattribute": {
-      "version": "https://github.com/KyleBanks/scene-ref-attribute.git",
+    "com.firstgeargames.fishnet": {
+      "version": "https://github.com/FirstGearGames/FishNet.git?path=Assets/FishNet",
       "depth": 0,
       "source": "git",
-      "dependencies": {},
-      "hash": "39a2e57663bbecd92ab4d580d3afa9d1b150724e"
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+      },
+      "hash": "1176e34bfe1e8e97840cf34722beb72905b4a3d1"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -126,7 +128,7 @@
     },
     "com.unity.nuget.newtonsoft-json": {
       "version": "3.2.1",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

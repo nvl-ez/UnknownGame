@@ -11,6 +11,7 @@ namespace Proyect
         public Vector2 movementInput;
         public float vInput;
         public float hInput;
+        public float moveAmount;
 
         public bool jump = false;
 
@@ -36,7 +37,7 @@ namespace Proyect
             vInput = movementInput.y;
             hInput = movementInput.x;
 
-            //Handle jumping
+            moveAmount = Mathf.Clamp01(Mathf.Abs(hInput)+Mathf.Abs(vInput));
         }
     }
 }

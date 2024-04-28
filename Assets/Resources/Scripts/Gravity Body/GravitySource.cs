@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class GravitySource : MonoBehaviour {
 
+    public float priority;
+
     void OnEnable() {
         CustomGravity.Register(this);
     }

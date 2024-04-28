@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using static Unity.Burst.Intrinsics.X86.Avx;
 
 public class AtmosphereSettingsUpdater : MonoBehaviour
 {
@@ -22,9 +23,13 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
         //Idk why cannot be done simpler but works UwU
         Volume volume = gameObject.GetComponent<Volume>();
         AtmospherePost tmp;
+
+        
+
         if (volume.profile.TryGet<AtmospherePost>(out tmp)) {
             atmospherePost = tmp;
         }
+        if (!tmp.IsActive()) return;
         worldGenerator = GameObject.Find("World Generator").GetComponent<WorldGenerator>();
         sun = GameObject.Find("Sun");
         opticalDepthCompute = Resources.Load<ComputeShader>("Scripts/Atmosphere Compute/AtmosphereTexture");
@@ -33,6 +38,7 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
     }
 
     private void Update() {
+        if (!atmospherePost.IsActive()) return;
         UpdateAtmosphereSettings(true);
     }
 

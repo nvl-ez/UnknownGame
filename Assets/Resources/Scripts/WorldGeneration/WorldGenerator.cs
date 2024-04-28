@@ -96,7 +96,6 @@ public class WorldGenerator : MonoBehaviour
         //Parent object for all chunks and responsible for Gravity
         world = new GameObject("World");
 
-        world.transform.tag = "Planet";
         world.transform.position = Vector3.zero;
         transform.position = Vector3.zero;
 

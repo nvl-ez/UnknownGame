@@ -1,11 +1,13 @@
+using FishNet.Object;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 namespace Proyect
 {
-    public class MovingSphere : MonoBehaviour
+    public class MovingSphere : NetworkBehaviour
     {
         [SerializeField, Range(0f, 100f)]
         float maxSpeed = 10f;
@@ -49,26 +51,30 @@ namespace Proyect
             inputHandler = GetComponent<InputManager>();
             body = GetComponent<Rigidbody>();
 
+            playerInputSpace = Camera.main.transform;
+
             body.useGravity = false;
             OnValidate();
         }
 
         // Update is called once per frame
+        [Client(RequireOwnership = true)]
         void Update()
         {
+
             if (playerInputSpace) {
                 rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, upAxis);
-                forwardAxis =
-                    ProjectDirectionOnPlane(playerInputSpace.forward, upAxis);
+                forwardAxis = ProjectDirectionOnPlane(playerInputSpace.forward, upAxis);
             } else {
                 rightAxis = ProjectDirectionOnPlane(Vector3.right, upAxis);
                 forwardAxis = ProjectDirectionOnPlane(Vector3.forward, upAxis);
             }
-            desiredVelocity =
-            new Vector3(inputHandler.hInput, 0f, inputHandler.vInput) * maxSpeed;
+            desiredVelocity =  new Vector3(inputHandler.hInput, 0f, inputHandler.vInput) * maxSpeed;
         }
 
+        [Client(RequireOwnership = true)]
         private void FixedUpdate() {
+
             Vector3 gravity = CustomGravity.GetGravity(body.position, out upAxis);
             UpdateState();
             AdjustVelocity();
@@ -141,6 +147,7 @@ namespace Proyect
             stepsSinceLastGrounded++;
             stepsSinceLastJump++;
             velocity = body.velocity;
+            AlignRotationWithGravityAndCamera();
             if (OnGround || SnapToGround() || CheckSteepContacts()) {
                 stepsSinceLastGrounded = 0;
 
@@ -223,6 +230,21 @@ namespace Proyect
             Gizmos.DrawRay(transform.position, forwardAxis);
             Gizmos.color = Color.red;
             Gizmos.DrawRay(transform.position, rightAxis);
+        }
+
+        void AlignRotationWithGravityAndCamera() {
+            Quaternion alignToGravity = Quaternion.FromToRotation(transform.up, upAxis);
+
+            Vector3 horizontalVelocity = velocity - Vector3.Dot(velocity, upAxis) * upAxis;
+
+            if(inputHandler.moveAmount > 0.01f && OnGround) {
+                Quaternion targetRotation = Quaternion.LookRotation(forwardAxis, upAxis);
+                targetRotation = alignToGravity *targetRotation;
+                body.rotation = Quaternion.Slerp(body.rotation, targetRotation, 20 * Time.deltaTime);
+            } else {
+                Quaternion targetRotation = alignToGravity * transform.rotation;
+                body.rotation = Quaternion.Lerp(body.rotation, targetRotation, 20f*Time.deltaTime);
+            }
         }
     }
 }

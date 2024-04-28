@@ -145,6 +145,9 @@ MonoBehaviour:
   m_Name: AtmospherePost
   m_EditorClassIdentifier: 
   active: 1
+  activeState:
+    m_OverrideState: 1
+    m_Value: 0
   planetCenter:
     m_OverrideState: 1
     m_Value: {x: 0, y: 0, z: 0}
