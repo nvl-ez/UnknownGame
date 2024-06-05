@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class WorldGenerator : MonoBehaviour
@@ -22,6 +23,11 @@ public class WorldGenerator : MonoBehaviour
     [Header("Atmosphere Properties")]
     public Material mat;
     public Color skyColor;
+
+    [Header("Trees")]
+    public Material trunkMaterial;
+    public Material leavesMaterial;
+    public Mesh leavesMesh;
 
     GameObject world;
 
@@ -75,19 +81,16 @@ public class WorldGenerator : MonoBehaviour
     }
 
     GameObject generateCore() {
+        Material material = new Material(Resources.Load<Shader>("Art/Terrain Shader/Core"));
+        material.SetFloat("_size", 10f);
         GameObject core = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        core.GetComponent<MeshRenderer>().material = material;
         core.name = "Core";
         core.tag = "Terrain";
         core.transform.position = Vector3.zero;
         core.transform.localScale = Vector3.one*0.3f*planetRadius;
         core.transform.parent = world.transform;
         return core;
-    }
-
-    void addGravity() {
-        world.AddComponent<SphereCollider>();
-        //world.AddComponent<GravityAreaCenter>();
-        world.GetComponent<SphereCollider>().radius = planetRadius*1.5f;
     }
 
     void generate() {
@@ -102,7 +105,6 @@ public class WorldGenerator : MonoBehaviour
         //Create the core of the world
 
         setUpNoiseGenerator();
-        addGravity();
         GameObject core = generateCore();
 
         chunkRadius += 1; //So terrain generated on the edge doesnt cut suddenly
@@ -120,6 +122,24 @@ public class WorldGenerator : MonoBehaviour
                     prefabChunk.transform.parent = world.transform;
                     prefabChunk.GetComponent<Renderer>().material = material;
                 }
+            }
+        }
+
+        addTrees();
+    }
+
+    void addTrees() {
+        TreeGenerator generator = new TreeGenerator();
+        generator.leavesMesh = leavesMesh;
+        generator.leavesMaterial = leavesMaterial;
+        generator.trunkMaterial = trunkMaterial;
+
+        for (int i = 0; i < 90; i++) {
+            Vector3 origin = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * planetRadius;
+
+            RaycastHit hit;
+            if (Physics.Raycast(origin, -origin, out hit, planetRadius, LayerMask.NameToLayer("Terrain"))) {
+                generator.placeTree(hit.point, hit.normal);
             }
         }
     }

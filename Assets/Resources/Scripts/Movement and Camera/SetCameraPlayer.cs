@@ -22,7 +22,7 @@ namespace Proyect
             CinemachineFreeLook cfl = GameObject.FindGameObjectWithTag("FreeLookCamera").GetComponent<CinemachineFreeLook>();
 
             cfl.Follow = this.transform;
-            cfl.LookAt = this.transform;
+            cfl.LookAt = this.transform.GetChild(0);
         }
     }
 }

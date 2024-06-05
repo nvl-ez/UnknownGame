@@ -28,7 +28,7 @@
                     "type": "PassThrough",
                     "id": "37fae1c3-07f6-4f5a-a206-aa960168be6f",
                     "expectedControlType": "Vector2",
-                    "processors": "",
+                    "processors": "ScaleVector2(x=0.1,y=0.1)",
                     "interactions": "",
                     "initialStateCheck": false
                 }

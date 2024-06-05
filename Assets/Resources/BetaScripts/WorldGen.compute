@@ -1,0 +1,45 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> vertices;
+RWStructuredBuffer<float> tris;
+
+int Xsamples;
+int Ysamples;
+int Zsamples;
+
+int postoi(float3 pos)
+{
+    return int(pos.x) + int(pos.y) * Xsamples + int(pos.z) * Xsamples * Ysamples;
+}
+
+float3 itopos(int i)
+{
+    float3 pos;
+    pos.z = (i / (Xsamples * Ysamples));
+    i = i % (Xsamples * Ysamples);
+    pos.y = (i / Xsamples);
+    pos.x = (i % Xsamples);
+    return pos;
+}
+
+float chunk[Xsamples * Ysamples * Zsamples];
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    //Set value acording to noise
+    float3 center = float3(3.5, 3.5, 3.5);
+    
+    float3 dist = id - center;
+    
+    float chunk[postoi(id.xyz)] = 1;
+    if (length(dist) > 4.0)
+    {
+        chunk[postoi(id.xyz)] = 0;
+    }
+    
+    //build the mesh
+    
+}
+

@@ -17,6 +17,8 @@ namespace Proyect
         float maxGroundAngle = 25f, maxStairsAngle = 50f;
         [SerializeField, Range(0f, 10f)]
         float jumpHeight = 2f;
+        [SerializeField, Range(0f, 10f)]
+        float gravitySmoothing = 5f;
         [SerializeField]
         int maxAirJumps = 0;
         [SerializeField, Range(0f, 100f)]
@@ -33,7 +35,8 @@ namespace Proyect
         Vector3 velocity;
         Vector3 desiredVelocity;
         Vector3 contactNormal, steepNormal;
-        Vector3 upAxis, rightAxis, forwardAxis;
+        [HideInInspector]
+        public Vector3 upAxis, rightAxis, forwardAxis;
 
         [SerializeField]
         LayerMask probeMask = -1, stairsMask = -1;
@@ -235,15 +238,19 @@ namespace Proyect
         void AlignRotationWithGravityAndCamera() {
             Quaternion alignToGravity = Quaternion.FromToRotation(transform.up, upAxis);
 
-            Vector3 horizontalVelocity = velocity - Vector3.Dot(velocity, upAxis) * upAxis;
+            float gravityAlignSmoothFactor = gravitySmoothing * Time.deltaTime;  // Smoothing factor for gravity alignment
 
-            if(inputHandler.moveAmount > 0.01f && OnGround) {
-                Quaternion targetRotation = Quaternion.LookRotation(forwardAxis, upAxis);
-                targetRotation = alignToGravity *targetRotation;
-                body.rotation = Quaternion.Slerp(body.rotation, targetRotation, 20 * Time.deltaTime);
+            if (inputHandler.moveAmount > 0.01f && OnGround) {
+                // Calculate the target rotation considering user input and gravity alignment
+                Quaternion inputTargetRotation = Quaternion.LookRotation(forwardAxis, upAxis);
+                Quaternion gravityAlignedRotation = Quaternion.Slerp(transform.rotation, alignToGravity * transform.rotation, gravityAlignSmoothFactor);
+
+                // Apply user input rotation to the gravity-aligned rotation
+                body.rotation = Quaternion.Slerp(body.rotation, gravityAlignedRotation * Quaternion.Inverse(transform.rotation) * inputTargetRotation, 20 * Time.deltaTime);
             } else {
-                Quaternion targetRotation = alignToGravity * transform.rotation;
-                body.rotation = Quaternion.Lerp(body.rotation, targetRotation, 20f*Time.deltaTime);
+                // When there is no user input, only smoothly align rotation with gravity
+                Quaternion targetRotation = Quaternion.Slerp(body.rotation, alignToGravity * transform.rotation, gravityAlignSmoothFactor);
+                body.rotation = targetRotation;
             }
         }
     }

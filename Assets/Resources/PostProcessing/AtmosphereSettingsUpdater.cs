@@ -15,6 +15,8 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
     public ComputeShader opticalDepthCompute;
     public RenderTexture opticalDepthTexture;
 
+    public bool turnOn = true;
+
     [Header("Optical Depth Texture")]
     public int textureSize = 256;
     public int opticalDepthPoints = 10;
@@ -28,11 +30,12 @@ public class AtmosphereSettingsUpdater : MonoBehaviour
 
         if (volume.profile.TryGet<AtmospherePost>(out tmp)) {
             atmospherePost = tmp;
+            atmospherePost.activeState.Override(turnOn);
         }
         if (!tmp.IsActive()) return;
         worldGenerator = GameObject.Find("World Generator").GetComponent<WorldGenerator>();
         sun = GameObject.Find("Sun");
-        opticalDepthCompute = Resources.Load<ComputeShader>("Scripts/Atmosphere Compute/AtmosphereTexture");
+        //opticalDepthCompute = Resources.Load<ComputeShader>("Scripts/Atmosphere Compute/AtmosphereTexture");
 
         UpdateAtmosphereSettings(false);
     }

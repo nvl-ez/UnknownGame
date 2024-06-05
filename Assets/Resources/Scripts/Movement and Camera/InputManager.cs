@@ -30,6 +30,16 @@ namespace Proyect
             playerInputs.Disable();
         }
 
+        private void Awake() {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+                // Start is called before the first frame update
+        void Start()
+        {
+            
+        }
+
         // Update is called once per frame
         void Update()
         {
